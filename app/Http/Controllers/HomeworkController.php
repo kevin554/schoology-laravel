@@ -69,12 +69,19 @@ class HomeworkController extends Controller
 
         $presentation->save();
 
+        $path = $_FILES["fileToUpload"]["name"];
+        $rel_path = ".".pathinfo($path, PATHINFO_EXTENSION);
+
+        $rel_path = $presentation->id.$rel_path;
+
+        copy( $_FILES['fileToUpload']['tmp_name'], 'files/'.$rel_path);
+
         $response = [
-            'success' => true,
-            'response' => '',
+            'success' => false,
+            'response' => '', // $request->get('file'), //  $path.' ', //.$rel_path, //$request->get('file'),
             'message' => ''
         ];
 
-        return json_encode($response);
+        return redirect('my_subject/'.$presentation->homework->subject->id);
     }
 }

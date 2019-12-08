@@ -78,15 +78,15 @@
                         @endforeach
 
                         <tr id="homeworkTemplate" style="display: none">
-                        <td>{title}</td>
-                        <td>{description}</td>
-                        <td>{death_line}</td>
-                        <td>{max_grade}</td>
-                        <td>
-                            <a href="{{ url('/presentationsOfHomework/{id}') }}" class="btn btn-sm btn-outline-secondary">
-                                Presentations
-                            </a>
-                        </td>
+                            <td>{title}</td>
+                            <td>{description}</td>
+                            <td>{death_line}</td>
+                            <td>{max_grade}</td>
+                            <td>
+                                <a href="{{ url('/presentationsOfHomework/{id}') }}" class="btn btn-sm btn-outline-secondary">
+                                    Presentations
+                                </a>
+                            </td>
                         <td>
                             <button class="btn btn-sm btn-outline-secondary" onclick="showHomeworkForm({objHomework})">Edit</button>
                         </td>

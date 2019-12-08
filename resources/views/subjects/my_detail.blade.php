@@ -41,7 +41,8 @@
                             <td>{{$homework["death_line"]}}</td>
                             <td>{{$homework["max_grade"]}}</td>
                             <td>
-                                <button class="btn btn-secondary" onclick="showSubmitForm({{$homework["id"]}})">Submit</button>
+                                <a href="javascript:void(0)" class="btnSubmit" data-id="{{ $homework["id"] }}">Sub</a>
+                                <button class="btn btn-secondary" >Submit</button>
                             </td>
                             <td>
                                 <button class="btn btn-secondary" onclick="viewScore({{$homework["id"]}})">View</button>
@@ -93,39 +94,54 @@
                 {{--</div>--}}
             {{--</div>--}}
 
-            {{--<div class="modal" id="modalSubmitHomework">--}}
-                {{--<div class="modal-dialog" role="document">--}}
-                    {{--<div class="modal-content">--}}
-                        {{--<form id="submitHomeworkForm">--}}
-                            {{--this is obligatory for security reasons--}}
-                            {{--@csrf--}}
-                            {{--<input id="homeworkId" type="text">--}}
-                            {{--<div class="form-group">--}}
-                                {{--<input id="btnSubmitHomework" class="btn btn-primary" value="Submit">--}}
-                            {{--</div>--}}
-                        {{--</form>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
-            {{--</div>--}}
+            <div class="modal" id="modalSubmitHomework">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form id="submitHomeworkForm" enctype="multipart/form-data" method="POST" action="{{ url('/homeworks/submit') }}">
+                            @csrf
+                            <input id="student_id" name="student_id" type="hidden">
+                            <input id="homework_id" name="homework_id" type="hidden">
+                            <div class="form-group">
+                                <input type="file" name="fileToUpload" id="fileToUpload">
+                                <button type="submit" class="btn btn-primary" value="Submit"></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         {{--</div>--}}
 
-        {{--<script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>--}}
+        <script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
         <script type="text/javascript">
             $(document).ready(function() {
+                var user = JSON.parse(sessionStorage.getItem('user'));
+
+                $('#student_id').val(user.id);
+
                 $("#btnSubmitHomework").on('click', function() {
+                    if (1 == 1) {
+
+                        return;
+                    }
+
                     var user = JSON.parse(sessionStorage.getItem('user'));
                     var id = $(this).data('id');
 
+                    var formData = new FormData();
+                    formData.append('_token', '{{csrf_token()}}');
+                    formData.append('file', $('#file').val());
+
                     var params = {
                         _token: '{{csrf_token()}}',
-                        student_id: user.id,
-                        homework_id: $('#homeworkId').val()
+                        // student_id: user.id,
+                        // homework_id: $('#homeworkId').val(),
+                        file: $('#file').val()
                     };
 
                     $.ajax({
                     url: '/homeworks/submit',
                         method: 'POST',
-                        data: params,
+                        data: formData,
                         success: function (data) {
                             data = JSON.parse(data);
 
@@ -148,6 +164,60 @@
                 });
             });
 
+            async function showSubmitForm() {
+                if (1 == 1) {
+                    $('#modalSubmitHomework').modal('show');
+                    return;
+                }
+
+                const {value: file} = await swal({
+                    title: 'Select image',
+                    input: 'file',
+                    inputAttributes: {
+                        'aria-label': 'Upload your profile picture'
+                    }
+                });
+
+
+
+                $.ajax({
+                    url: '/homeworks/submit',
+                    method: 'POST',
+                    data: {
+                        _token: '{{csrf_token()}}',
+                        file: e.target.result
+                    },
+                    success: function(data) {
+                        data = JSON.parse(data);
+
+                        if (data.success) {
+                            var subject = data.response;
+
+                            showFormSubject(id, subject.name);
+                        } else {
+                            showError(data.message);
+                        }
+                    }, error(e) {
+                        console.log(e);
+                    }
+                });
+
+
+
+                    // const reader = new FileReader;
+                    //
+                    // reader.onload = (e) => {
+                    //     swal({
+                    //         title: 'Your uploaded picture',
+                    //         imageUrl: e.target.result,
+                    //         imageAlt: 'The uploaded picture'
+                    //     })
+                    // };
+                    //
+                    // reader.readAsDataURL(file)
+                // }
+            }
+
             function viewScore(homeworkId) {
                 var user = JSON.parse(sessionStorage.getItem('user'));
 
@@ -166,9 +236,12 @@
                         if (data.success) {
                             var presentation = data.response;
 
-                            alert('your score i s ' + presentation.grade)
+                            swal({
+                                type: "info",
+                                title: "Your score is " + presentation.grade
+                            })
                         } else {
-                            alert(data.message);
+                            showError(data.message);
                         }
                     }, error(e) {
                         console.log(e);
@@ -176,13 +249,17 @@
                 });
             }
 
-            function showSubmitForm() {
+            $(document).on('click', '.btnSubmit', function () {
+                var id = $(this).data('id');
+                var user = JSON.parse(sessionStorage.getItem('user'));
 
-            }
+                $('#student_id').val(user.id);
+                $('#homework_id').val(id);
 
-            function viewScore() {
+                $('#modalSubmitHomework').modal('show');
 
-            }
+               return false;
+            });
         </script>
     </div>
 @endsection
